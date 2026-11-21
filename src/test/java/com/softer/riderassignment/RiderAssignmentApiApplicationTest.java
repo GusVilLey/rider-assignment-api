@@ -6,6 +6,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
+import com.softer.riderassignment.model.AssignmentStatus;
+import com.softer.riderassignment.model.RiderAssignment;
 import com.softer.riderassignment.repository.RiderAssignmentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -96,4 +98,32 @@ class RiderAssignmentApiApplicationTest {
                 () -> assertEquals(1, repository.findAll().size())
         );
     }
+
+    // ------------------------------------------------------------------
+    // 3. POST /api/assignments
+    // ------------------------------------------------------------------
+    @Test
+    @DisplayName("should register a new assignment")
+    @Sql(
+            statements = "DELETE FROM rider_assignments",
+            executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD
+    )
+    void test3_testAddAssignment() {
+        RiderAssignment request = new RiderAssignment(
+                null, 7001L, 301L, AssignmentStatus.ASSIGNED, null);
+
+        RiderAssignment response = restTemplate.postForObject(
+                baseUrl, request, RiderAssignment.class);
+
+        assertAll(
+                () -> assertNotNull(response),
+                () -> assertNotNull(response.getId()),
+                () -> assertEquals(7001L, response.getDeliveryId()),
+                () -> assertEquals(301L, response.getRiderId()),
+                () -> assertEquals(AssignmentStatus.ASSIGNED, response.getStatus()),
+                () -> assertNotNull(response.getAssignedAt()),
+                () -> assertEquals(1, repository.findAll().size())
+        );
+    }
+
 }
