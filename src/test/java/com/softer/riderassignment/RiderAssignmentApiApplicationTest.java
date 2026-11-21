@@ -14,6 +14,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
@@ -21,6 +22,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * Pruebas de integración de la API de asignación de riders.
@@ -202,4 +204,18 @@ class RiderAssignmentApiApplicationTest {
 
         assertEquals(0, repository.findAll().size());
     }
+
+    // ------------------------------------------------------------------
+    // 7. GET /api/assignments/{id} cuando no existe -> 404
+    // ------------------------------------------------------------------
+    @Test
+    @DisplayName("should return 404 when assignment does not exist")
+    void test7_testFindAssignmentNotFound() {
+        assertThrows(
+                HttpClientErrorException.NotFound.class,
+                () -> restTemplate.getForObject(
+                        baseUrl + "/{id}", RiderAssignment.class, 999)
+        );
+    }
+
 }
