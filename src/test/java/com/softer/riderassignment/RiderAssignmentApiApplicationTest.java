@@ -218,4 +218,27 @@ class RiderAssignmentApiApplicationTest {
         );
     }
 
+    // ------------------------------------------------------------------
+    // 8. POST /api/assignments con delivery duplicado -> 409
+    // ------------------------------------------------------------------
+    @Test
+    @DisplayName("should reject a duplicate delivery assignment")
+    @Sql(
+            statements = "INSERT INTO rider_assignments (id, delivery_id, rider_id, status, assigned_at) "
+                    + "VALUES (1, 7001, 301, 'ASSIGNED', '2026-11-21 10:00:00')",
+            executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
+    )
+    @Sql(
+            statements = "DELETE FROM rider_assignments",
+            executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD
+    )
+    void test8_testRejectDuplicateDelivery() {
+        RiderAssignment request = new RiderAssignment(
+                null, 7001L, 999L, AssignmentStatus.ASSIGNED, null);
+
+        assertThrows(
+                HttpClientErrorException.Conflict.class,
+                () -> restTemplate.postForObject(baseUrl, request, RiderAssignment.class)
+        );
+    }
 }
