@@ -152,4 +152,33 @@ class RiderAssignmentApiApplicationTest {
                 () -> assertEquals(AssignmentStatus.ASSIGNED, response.getStatus())
         );
     }
+
+    // ------------------------------------------------------------------
+    // 5. PUT /api/assignments/{id}
+    // ------------------------------------------------------------------
+    @Test
+    @DisplayName("should update assignment with id=1")
+    @Sql(
+            statements = "INSERT INTO rider_assignments (id, delivery_id, rider_id, status, assigned_at) "
+                    + "VALUES (1, 7001, 301, 'ASSIGNED', '2026-11-21 10:00:00')",
+            executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
+    )
+    @Sql(
+            statements = "DELETE FROM rider_assignments",
+            executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD
+    )
+    void test5_testUpdateAssignment() {
+        RiderAssignment request = new RiderAssignment(
+                1L, 7001L, 302L, AssignmentStatus.ACCEPTED, null);
+
+        restTemplate.put(baseUrl + "/{id}", request, 1);
+
+        RiderAssignment fromDB = repository.findById(1L).orElseThrow();
+
+        assertAll(
+                () -> assertEquals(302L, fromDB.getRiderId()),
+                () -> assertEquals(AssignmentStatus.ACCEPTED, fromDB.getStatus())
+        );
+    }
+
 }
