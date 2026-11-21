@@ -126,4 +126,30 @@ class RiderAssignmentApiApplicationTest {
         );
     }
 
+    // ------------------------------------------------------------------
+    // 4. GET /api/assignments/{id}
+    // ------------------------------------------------------------------
+    @Test
+    @DisplayName("should get assignment with id=1")
+    @Sql(
+            statements = "INSERT INTO rider_assignments (id, delivery_id, rider_id, status, assigned_at) "
+                    + "VALUES (1, 7001, 301, 'ASSIGNED', '2026-11-21 10:00:00')",
+            executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
+    )
+    @Sql(
+            statements = "DELETE FROM rider_assignments",
+            executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD
+    )
+    void test4_testFindAssignmentById() {
+        RiderAssignment response = restTemplate.getForObject(
+                baseUrl + "/{id}", RiderAssignment.class, 1);
+
+        assertAll(
+                () -> assertNotNull(response),
+                () -> assertEquals(1L, response.getId()),
+                () -> assertEquals(7001L, response.getDeliveryId()),
+                () -> assertEquals(301L, response.getRiderId()),
+                () -> assertEquals(AssignmentStatus.ASSIGNED, response.getStatus())
+        );
+    }
 }
