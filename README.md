@@ -133,6 +133,29 @@ Se incluyen:
 - Pruebas del controlador con MockMvc.
 - Pruebas de integración con servidor HTTP real y H2.
 
+### Pruebas de integración
+
+La clase `RiderAssignmentApiApplicationTest` levanta el contexto completo de Spring con
+`@SpringBootTest(webEnvironment = RANDOM_PORT)` y el perfil `test`
+(`src/test/resources/application-test.properties`, H2 en memoria). Cada prueba llama a la API
+por HTTP con `RestTemplate` y verifica el estado real de la base con el repositorio.
+
+| # | Prueba | Qué cubre |
+|---|---|---|
+| 1 | `test1_testGetAssignmentsWhenTableIsEmpty` | `GET /api/assignments` con la tabla vacía |
+| 2 | `test2_testGetAssignmentsWhenTableIsNotEmpty` | `GET /api/assignments` con datos |
+| 3 | `test3_testAddAssignment` | `POST /api/assignments` |
+| 4 | `test4_testFindAssignmentById` | `GET /api/assignments/{id}` |
+| 5 | `test5_testUpdateAssignment` | `PUT /api/assignments/{id}` |
+| 6 | `test6_testDeleteAssignment` | `DELETE /api/assignments/{id}` |
+| 7 | `test7_testFindAssignmentNotFound` | `404` cuando la asignación no existe |
+| 8 | `test8_testRejectDuplicateDelivery` | `409` cuando el `deliveryId` ya tiene asignación |
+
+**Regla de aislamiento:** cada prueba deja la base exactamente como la encontró. Los datos que
+necesita se siembran con `@Sql(executionPhase = BEFORE_TEST_METHOD)` y se eliminan con
+`@Sql(executionPhase = AFTER_TEST_METHOD)`. Así las pruebas se pueden ejecutar juntas, por
+separado o en cualquier orden.
+
 ## Consideraciones
 
 - Las tablas se generan/actualizan mediante Hibernate (`ddl-auto=update`) en el perfil principal.
