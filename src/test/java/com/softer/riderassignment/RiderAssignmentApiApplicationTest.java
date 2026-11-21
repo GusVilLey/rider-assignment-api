@@ -73,4 +73,27 @@ class RiderAssignmentApiApplicationTest {
         );
     }
 
+    // ------------------------------------------------------------------
+    // 2. GET /api/assignments con la tabla poblada
+    // ------------------------------------------------------------------
+    @Test
+    @DisplayName("should get all assignments when table is not empty")
+    @Sql(
+            statements = "INSERT INTO rider_assignments (id, delivery_id, rider_id, status, assigned_at) "
+                    + "VALUES (1, 7001, 301, 'ASSIGNED', '2026-11-21 10:00:00')",
+            executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
+    )
+    @Sql(
+            statements = "DELETE FROM rider_assignments",
+            executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD
+    )
+    void test2_testGetAssignmentsWhenTableIsNotEmpty() {
+        List<?> response = restTemplate.getForObject(baseUrl, List.class);
+
+        assertAll(
+                () -> assertNotNull(response),
+                () -> assertEquals(1, response.size()),
+                () -> assertEquals(1, repository.findAll().size())
+        );
+    }
 }
